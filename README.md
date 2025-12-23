@@ -55,7 +55,7 @@ Many traditional forecasting methods (CPM/PERT, fuzzy EVM, classical MC) are eff
 ---
 
 ## Repository contents (suggested clean structure)
-
+```
 capstone-delay-prediction/
 ├─ README.md
 ├─ report/
@@ -66,7 +66,7 @@ capstone-delay-prediction/
 │ └─ rg30_set1.csv
 └─ assets/
 └─ (optional) figures, screenshots
-
+```
 
 ---
 
