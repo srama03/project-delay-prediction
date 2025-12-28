@@ -3,6 +3,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
+import joblib
 # internal dependencies
 from src.data import load_data
 
@@ -74,6 +75,9 @@ def run_training(csv_path, params):
     # eval
     val_metrics = evaluate_model(rf, X_val, y_val)
     test_metrics = evaluate_model(rf, X_test, y_test)
+
+    # save model artifact:
+    joblib.dump(rf, "src/models/rf_delay.joblib")
 
     return (rf, val_metrics, test_metrics)
 
