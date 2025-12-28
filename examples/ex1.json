@@ -1,0 +1,12 @@
+{
+    "n_edges" : 54,
+    "density" : 0.124,
+    "critical_path_len" : 6,
+    "pct_critical_tasks" : 0.2,
+    "T_baseline" : 31.0,
+    "mean_m" : 5.7,
+    "mean_range_po" : 4.033,
+    "instability_m" : 2.76,
+    "spi_early" : 1.69,
+    "cpi_early" : 0.97
+}
