@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
 import joblib
+import json
+from pathlib import Path
 # internal dependencies
 from src.data import load_data
 
@@ -59,6 +61,7 @@ def evaluate_model(model, X, y):
         "f1" : f1,
         "roc_auc" : roc_auc
     }
+    
     return metrics
 
 def run_training(csv_path, params):
@@ -78,7 +81,18 @@ def run_training(csv_path, params):
 
     # save model artifact:
     joblib.dump(rf, "models/rf_delay.joblib")
-
+        
+    # saving metrics:
+    report_path = Path("report")
+    report_path.mkdir(exist_ok=True)
+    run_summary = {
+    "data_path": csv_path,
+    "model_path": "models/rf_delay.joblib",
+    "params": params,
+    "val_metrics": val_metrics,
+    "test_metrics": test_metrics}
+    with open(report_path / "train_run.json", "w") as f:
+        json.dump(run_summary, f, indent=2)
     return (rf, val_metrics, test_metrics)
 
 # main function:

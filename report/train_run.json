@@ -1,0 +1,21 @@
+{
+  "data_path": "data/rg30_set1.csv",
+  "model_path": "models/rf_delay.joblib",
+  "params": {
+    "n_estimators": 300,
+    "max_depth": 5,
+    "min_samples_leaf": 5,
+    "max_features": null,
+    "random_state": 42
+  },
+  "val_metrics": {
+    "accuracy": 0.7333333333333333,
+    "f1": 0.7464788732394366,
+    "roc_auc": 0.7413186813186814
+  },
+  "test_metrics": {
+    "accuracy": 0.6888888888888889,
+    "f1": 0.7,
+    "roc_auc": 0.7584541062801932
+  }
+}
