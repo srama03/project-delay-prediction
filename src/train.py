@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 import joblib
 import json
 from pathlib import Path
+import mlflow
 # internal dependencies
 from src.data import load_data
 
@@ -66,15 +67,18 @@ def evaluate_model(model, X, y):
 
 def run_training(csv_path, params):
     """
-    calls load → split → train → evaluate
+    calls load → split → train → evaluate; saves model artifact; logs mlflow
     returns (model, val_metrics, test_metrics)
     """
     # load
     X, y = load_data(csv_path)
+
     # split
     X_train, X_val, X_test, y_train, y_val, y_test = split(X, y)
+
     # fit model
     rf = train_rf(X_train, y_train, params)
+
     # eval
     val_metrics = evaluate_model(rf, X_val, y_val)
     test_metrics = evaluate_model(rf, X_test, y_test)
@@ -93,6 +97,20 @@ def run_training(csv_path, params):
     "test_metrics": test_metrics}
     with open(report_path / "train_run.json", "w") as f:
         json.dump(run_summary, f, indent=2)
+    
+    # mlflow logging
+    with mlflow.start_run(run_name="rf_rg30_set1"):
+        # log hyperparams
+        mlflow.log_params(params)
+        # log val metrics
+        mlflow.log_metrics({f"val_{k}": v for k, v in val_metrics.items()})
+        # log test metrics
+        mlflow.log_metrics({f"test_{k}" : v for k, v in test_metrics.items()})
+        # log model artifact
+        mlflow.log_artifact("models/rf_delay.joblib")
+        # tagging w model name
+        mlflow.set_tag("model_type", "random_forest")
+        
     return (rf, val_metrics, test_metrics)
 
 # main function:
