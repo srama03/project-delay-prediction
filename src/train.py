@@ -99,6 +99,7 @@ def run_training(csv_path, params):
         json.dump(run_summary, f, indent=2)
     
     # mlflow logging
+    mlflow.set_experiment("delay_prediction")
     with mlflow.start_run(run_name="rf_rg30_set1"):
         # log hyperparams
         mlflow.log_params(params)
@@ -108,8 +109,11 @@ def run_training(csv_path, params):
         mlflow.log_metrics({f"test_{k}" : v for k, v in test_metrics.items()})
         # log model artifact
         mlflow.log_artifact("models/rf_delay.joblib")
+        mlflow.log_artifact("report/train_run.json")
         # tagging w model name
         mlflow.set_tag("model_type", "random_forest")
+        mlflow.set_tag("data_path", csv_path)
+
         
     return (rf, val_metrics, test_metrics)
 
