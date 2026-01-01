@@ -7,6 +7,7 @@ import joblib
 import json
 from pathlib import Path
 import mlflow
+import mlflow.sklearn
 # internal dependencies
 from src.data import load_data
 
@@ -85,6 +86,7 @@ def run_training(csv_path, params):
 
     # save model artifact:
     joblib.dump(rf, "models/rf_delay.joblib")
+   
         
     # saving metrics:
     report_path = Path("report")
@@ -110,6 +112,7 @@ def run_training(csv_path, params):
         # log model artifact
         mlflow.log_artifact("models/rf_delay.joblib")
         mlflow.log_artifact("report/train_run.json")
+        mlflow.sklearn.log_model(rf, name="model", input_example = X_train.iloc[:1])
         # tagging w model name
         mlflow.set_tag("model_type", "random_forest")
         mlflow.set_tag("data_path", csv_path)
