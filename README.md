@@ -1,106 +1,143 @@
-# Simulation-Driven ML for Semi-Dynamic Project Delay Prediction (DS 340W Capstone)
+# Simulation-Driven ML for Semi-Dynamic Project Delay Prediction  
+*(DS 340W Capstone + Engineering Extension)*
 
-A simulation-driven machine learning framework that predicts project schedule delay early by combining:
-- **CPM/PERT** project structure,
-- **Monte Carlo simulation–derived uncertainty features**, and
-- early **EVM indicators (SPI/CPI at 20% progress)**.
+This project explores **early prediction of project schedule delays** by combining:
 
-We train classical ML models to learn delay-risk patterns **from simulation outcomes** rather than relying on expert-defined fuzzy/grey rules or predefined causal structures.
+- **CPM/PERT project structure**
+- **Monte Carlo simulation–derived uncertainty features**
+- **Early earned-value indicators (SPI/CPI at 20% progress)**
 
-**Team:** Sahana Ramachandran, Varsha Giridharan, Siyona Behera
-**Course:** DS 340W (Fall 2025)
+In addition to the original research component, the project has been extended into a reproducible ML pipeline with explicit training, inference, experiment tracking, and containerization.
 
 ---
 
-## Why this matters
+## Research motivation
 
-Many traditional forecasting methods (CPM/PERT, fuzzy EVM, classical MC) are effectively **static snapshots** and often treat risks as independent. This project uses simulation as a **data generator** to extract empirical uncertainty behavior and then trains ML models for **semi-dynamic early forecasting** (20% progress).
+Many traditional forecasting approaches (CPM/PERT, fuzzy EVM, classical Monte Carlo) operate as **static snapshots** and often assume independent risks. This work uses **simulation as a data generator** to capture empirical uncertainty behavior, then trains ML models to enable **semi-dynamic early forecasting** at only 20% project progress.
 
 ---
 
 ## Method (high level)
 
-1. **Data + structure**
-   - Uses RanGen2 **RG30** synthetic project networks (Set 1; 900 projects).
+### Data + structure
+- Synthetic project networks from **RanGen2 RG30** (Set 1; 900 projects)
 
-2. **Uncertainty injection (PERT triplets)**
-   - Most-likely duration comes from RG30.
-   - Optimistic/pessimistic durations are generated around it (controlled spread).
+### Uncertainty injection (PERT triplets)
+- Most-likely durations from RG30
+- Optimistic/pessimistic durations generated with controlled spread
 
-3. **Monte Carlo simulation**
-   - **200 runs per project**
-   - Produces distributional / uncertainty features (e.g., instability from variance of completion times).
-   - A project is labeled **delayed** if the probability of late completion exceeds a threshold (see report).
+### Monte Carlo simulation
+- 200 simulation runs per project
+- Distributional uncertainty features (e.g., instability from variance of completion times)
+- Project labeled *delayed* if probability of late completion exceeds a threshold
 
-4. **Early progress features (20% progress)**
-   - Computes **SPI** and **CPI** at 20% progress using time-based proxies (RG30 has no cost). 
-   
-5. **Models**
-   - Logistic Regression
-   - Gaussian Naive Bayes
-   - Random Forest (primary non-linear model)
+### Early progress features (20%)
+- SPI and CPI computed at 20% progress
+- Time-based cost proxies (RG30 has no explicit cost data)
 
-6. **Baselines**
-   - Early SPI thresholding
-   - Structural-only logistic regression baseline
+### Models
+- Logistic Regression  
+- Gaussian Naive Bayes  
+- **Random Forest (primary non-linear model)**
+
+### Baselines
+- Early-SPI thresholding  
+- Structural-only logistic regression  
 
 ---
 
 ## Key results (summary)
 
-- **Random Forest** performed best overall and outperformed early-SPI baseline.
-- Structural CPM features are strong; adding simulation-derived uncertainty + early CPI improves predictive signal.
-- Reported test performance is around **ROC-AUC ≈ 0.76** for the tuned Random Forest (see report tables/figures). 
+- Random Forest performs best overall and outperforms early-SPI baseline  
+- Structural CPM features are strong predictors  
+- Adding simulation-derived uncertainty and early CPI improves signal  
+- Test performance: **ROC-AUC ≈ 0.76** for tuned Random Forest  
+  (see tables/figures in report)
 
 ---
 
-## Repository contents (suggested clean structure)
+## Engineering extension
+
+The notebook-based research code has been refactored into a **reproducible ML system**:
+
+### Training
+- Deterministic data splits  
+- Explicit hyperparameter configuration  
+- Model evaluation (Accuracy, F1, ROC-AUC)  
+- Model artifact persistence  
+- MLflow experiment tracking (params, metrics, artifacts, model)
+
+### Inference
+- Schema-validated JSON input  
+- Shared preprocessing logic (no training–inference drift)  
+- Single-instance probability prediction:  P(delay | project features)
+- CLI interface
+
+### Reproducibility
+- Dockerized training and inference  
+- Consistent runtime environment across machines  
+- Artifacts written back via volume mounts  
+
+---
+
+## Repository structure
 ```
-capstone-delay-prediction/
-├─ README.md
-├─ report/
-│ └─ Report.pdf
-├─ notebooks/
-│ └─ FinalCode.ipynb
+project-delay-prediction/
+├─ src/
+│ ├─ train.py # training + evaluation + MLflow logging
+│ ├─ infer.py # inference CLI
+│ ├─ data.py # data loading + preprocessing
+│ ├─ schema.py # feature / label contract
+│
 ├─ data/
 │ └─ rg30_set1.csv
-└─ assets/
-└─ (optional) figures, screenshots
+│
+├─ models/
+│ └─ rf_delay.joblib
+│
+├─ report/
+│ └─ Report.pdf
+│
+├─ examples/
+│ └─ ex1.json # example inference input
+│
+├─ Dockerfile
+├─ requirements.txt
+└─ README.md
 ```
 
 ---
 
-## How to run (Colab)
+## How to run (Docker)
 
-1. Download:
-   - `notebooks/FinalCode.ipynb`
-   - `data/rg30_set1.csv`
+### Inference
+```
+docker run --rm -v "$PWD:/app" delay-predictor \
+  python -m src.infer --input examples/ex1.json
+```
+### Training
+```
+docker run --rm -v "$PWD:/app" delay-predictor \
+  python -m src.train
+```
 
-2. Upload to Google Drive (MyDrive).
+- Artifacts (models/, report/, mlruns/) are written to the local filesystem.
 
-3. Open the notebook in Google Colab and **Run all**.
-
-> Note: You do **not** need to run the full data-generation section to reproduce results (final dataset is provided).
-
----
-
-## Local setup (optional)
-
-If you want to run locally:
+## How to run (local)
 
 ```
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+python -m src.train
 ```
-Then open the notebook in Jupyter/VSCode.
 
-Data source
-Project network data is based on Ghent University Project Management Research Group datasets (RanGen/RG30). 
-Report
+## Original research context
 
+This project was developed as part of the DS 340W capstone at Penn State.
+See `report/Report.pdf` for full methodological details and results.
 
-Citation
-If you use or build on this work, please cite the course report in report/Report.pdf.
+- Team: Sahana Ramachandran, Varsha Giridharan, Siyona Behera
+- Data source: Ghent University Project Management Research Group (RanGen / RG30)
 
 
