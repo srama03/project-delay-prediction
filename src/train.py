@@ -112,7 +112,7 @@ def run_training(csv_path, params):
         # log model artifact
         mlflow.log_artifact("models/rf_delay.joblib")
         mlflow.log_artifact("report/train_run.json")
-        mlflow.sklearn.log_model(rf, name="model", input_example = X_train.iloc[:1])
+        mlflow.sklearn.log_model(rf, name="model", input_example = X_train.iloc[:1].astype("float64"))
         # tagging w model name
         mlflow.set_tag("model_type", "random_forest")
         mlflow.set_tag("data_path", csv_path)
