@@ -69,7 +69,7 @@ The notebook-based research code has been refactored into a **reproducible ML sy
 
 ### Inference
 - Schema-validated JSON input  
-- Shared preprocessing logic (no training–inference drift)  
+- Shared preprocessing  
 - Single-instance probability prediction:  P(delay | project features)
 - CLI interface
 
